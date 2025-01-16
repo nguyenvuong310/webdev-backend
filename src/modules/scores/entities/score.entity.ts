@@ -13,31 +13,31 @@ export class Score {
   id: number;
 
   @Column({ nullable: true, type: 'float' })
-  math_score: number;
+  math: number;
 
   @Column({ nullable: true, type: 'float' })
-  literature_score: number;
+  literature: number;
 
   @Column({ nullable: true, type: 'float' })
-  language_score: number;
+  language: number;
 
   @Column({ nullable: true, type: 'float' })
-  physics_score: number;
+  physics: number;
 
   @Column({ nullable: true, type: 'float' })
-  chemistry_score: number;
+  chemistry: number;
 
   @Column({ nullable: true, type: 'float' })
-  biology_score: number;
+  biology: number;
 
   @Column({ nullable: true, type: 'float' })
-  history_score: number;
+  history: number;
 
   @Column({ nullable: true, type: 'float' })
-  geography_score: number;
+  geography: number;
 
   @Column({ nullable: true, type: 'float' })
-  civic_education_score: number;
+  civic_education: number;
 
   @Column({ nullable: true })
   language_code: string;
