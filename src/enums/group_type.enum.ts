@@ -5,3 +5,11 @@ export enum GroupType {
   C00 = 'C00',
   D01 = 'D01',
 }
+
+export const GroupValue: { [key: string]: string[] } = {
+  A00: ['math', 'physics', 'chemistry'],
+  A01: ['math', 'language', 'physics'],
+  B00: ['math', 'biology', 'chemistry'],
+  C00: ['literature', 'history', 'geography'],
+  D01: ['math', 'literature', 'language'],
+};

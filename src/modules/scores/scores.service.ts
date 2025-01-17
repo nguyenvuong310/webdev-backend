@@ -1,50 +1,111 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ScoresRepository } from './scores.repository';
-import { GroupType } from 'src/enums/group_type.enum';
 import { ScoreDto } from './dto/scores.dto';
 import { ChartDto } from './dto/chart.dto';
-import { ChartType } from 'src/enums/chart_type.enum';
+import { ChartType } from '../../enums/chart_type.enum';
+import { RedisService } from '../../services/redis/redis.service';
+import { ChartCircleDto } from './dto/chartCircle.dto';
 
 @Injectable()
 export class ScoresService {
   constructor(
     @Inject(ScoresRepository) private scoresRepository: ScoresRepository,
+    @Inject(RedisService) private redisService: RedisService,
   ) {}
   async checkScore(registrationNo: string): Promise<ScoreDto> {
+    const dataCached = await this.redisService.getValue(registrationNo);
+
+    const scoresCached: ScoreDto = dataCached ? JSON.parse(dataCached) : null;
+    if (scoresCached) {
+      return scoresCached;
+    }
+
     const score = await this.scoresRepository.checkScore(registrationNo);
 
     if (!score) {
       throw new Error('Score not found with this registration number');
     }
-    return new ScoreDto(score);
+    const scoreMapped = new ScoreDto(score);
+
+    await this.redisService.setValue(
+      registrationNo,
+      JSON.stringify(scoreMapped),
+      3600,
+    );
+    return scoreMapped;
+  }
+
+  private async getScoresFromCache(
+    cacheKey: string,
+  ): Promise<ScoreDto[] | null> {
+    const cachedData = await this.redisService.getValue(cacheKey);
+    return cachedData ? JSON.parse(cachedData) : null;
+  }
+
+  private async saveScoresToCache(
+    cacheKey: string,
+    scores: ScoreDto[],
+  ): Promise<void> {
+    await this.redisService.setValue(cacheKey, JSON.stringify(scores), 3600);
+  }
+
+  private async getScoresFromRepository(type: string): Promise<ScoreDto[]> {
+    const scores = await this.scoresRepository.top10StudentsGroup(type);
+    return scores.map((score) => new ScoreDto(score));
   }
 
   async top10StudentsGroup(type: string): Promise<ScoreDto[]> {
-    switch (type) {
-      case GroupType.A00:
-        const scoresA00 = await this.scoresRepository.top10StudentsGroupA00();
-        return scoresA00.map((score) => new ScoreDto(score));
-      case GroupType.A01:
-        const scoresA01 = await this.scoresRepository.top10StudentsGroupA01();
-        return scoresA01.map((score) => new ScoreDto(score));
-      case GroupType.B00:
-        const scoresB00 = await this.scoresRepository.top10StudentsGroupB00();
-        return scoresB00.map((score) => new ScoreDto(score));
-      case GroupType.C00:
-        const scoresC00 = await this.scoresRepository.top10StudentsGroupC00();
-        return scoresC00.map((score) => new ScoreDto(score));
-      case GroupType.D01:
-        const scoresD01 = await this.scoresRepository.top10StudentsGroupD01();
-        return scoresD01.map((score) => new ScoreDto(score));
-      default:
-        throw new Error('Invalid group type');
+    const cacheKey = `top10StudentsGroup${type}`;
+
+    const scoresCached = await this.getScoresFromCache(cacheKey);
+    if (scoresCached) {
+      return scoresCached;
     }
+
+    const scores = await this.getScoresFromRepository(type);
+
+    await this.saveScoresToCache(cacheKey, scores);
+
+    return scores;
   }
 
   async getSubjectScoreChartByType(
     type: string,
     typeChart: string,
-  ): Promise<ChartDto> {
+  ): Promise<ChartDto | ChartCircleDto> {
+    const cacheKey = `getSubjectScoreChartByType:${type}:${typeChart}`;
+
+    const cachedData = await this.getCachedChartData(cacheKey, typeChart);
+    if (cachedData) {
+      return cachedData;
+    }
+
+    const chartData = await this.getChartData(type, typeChart);
+
+    await this.cacheChartData(cacheKey, chartData);
+
+    return chartData;
+  }
+
+  private async getCachedChartData(
+    cacheKey: string,
+    typeChart: string,
+  ): Promise<ChartDto | ChartCircleDto | null> {
+    const cachedData = await this.redisService.getValue(cacheKey);
+    if (cachedData) {
+      if (typeChart === ChartType.BAR) {
+        return JSON.parse(cachedData) as ChartDto;
+      } else if (typeChart === ChartType.CIRCLE) {
+        return JSON.parse(cachedData) as ChartCircleDto;
+      }
+    }
+    return null;
+  }
+
+  private async getChartData(
+    type: string,
+    typeChart: string,
+  ): Promise<ChartDto | ChartCircleDto> {
     switch (typeChart) {
       case ChartType.BAR:
         return await this.scoresRepository.getSubjectScoreChartBar(type);
@@ -53,5 +114,12 @@ export class ScoresService {
       default:
         throw new Error('Invalid chart type');
     }
+  }
+
+  private async cacheChartData(
+    cacheKey: string,
+    chartData: ChartDto | ChartCircleDto,
+  ): Promise<void> {
+    await this.redisService.setValue(cacheKey, JSON.stringify(chartData), 3600);
   }
 }

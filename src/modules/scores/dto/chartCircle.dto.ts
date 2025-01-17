@@ -3,7 +3,7 @@ import { IsArray, IsNumber, IsString, ArrayNotEmpty } from 'class-validator';
 
 import { LevelType } from '../../../enums/level_type.enum';
 
-export class ChartCircletDto {
+export class ChartCircleDto {
   @ApiProperty({ example: [10, 20, 30, 40] })
   @IsArray()
   @ArrayNotEmpty()

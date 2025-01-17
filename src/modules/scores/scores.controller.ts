@@ -1,12 +1,20 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ScoresService } from './scores.service';
-import { ApiOperation, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiExtraModels,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { GroupType } from 'src/enums/group_type.enum';
 
 import { ScoreDto } from './dto/scores.dto';
 import { ResponseMessage } from 'src/decorator/reposone_message.decorator';
 import { SubjectType } from 'src/enums/subject_type.enum';
 import { ChartType } from 'src/enums/chart_type.enum';
+import { ChartDto } from './dto/chart.dto';
+import { ChartCircleDto } from './dto/chartCircle.dto';
 
 @Controller('scores')
 export class ScoresController {
@@ -44,6 +52,19 @@ export class ScoresController {
   @ApiQuery({
     enum: ChartType,
     name: 'typeChart',
+  })
+  @ApiExtraModels(ChartDto, ChartCircleDto)
+  @ApiOkResponse({
+    content: {
+      'application/json': {
+        schema: {
+          oneOf: [
+            { $ref: getSchemaPath(ChartDto) },
+            { $ref: getSchemaPath(ChartCircleDto) },
+          ],
+        },
+      },
+    },
   })
   async getSubjectScoreClassificationCircle(
     @Query('typeSubject') type: string,

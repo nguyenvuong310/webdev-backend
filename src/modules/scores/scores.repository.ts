@@ -4,7 +4,8 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Score } from './entities/score.entity';
 import { ChartDto } from './dto/chart.dto';
-import { ChartCircletDto } from './dto/chartCircle.dto';
+import { ChartCircleDto } from './dto/chartCircle.dto';
+import { GroupValue } from 'src/enums/group_type.enum';
 
 @Injectable()
 export class ScoresRepository {
@@ -35,9 +36,13 @@ export class ScoresRepository {
       .getOne();
   }
 
-  //List top 10 students of group A00 including (math, physics, chemistry)
-  async top10StudentsGroupA00(): Promise<Score[]> {
-    const top10StudentsGroupA = await this.scoreRepository
+  async top10StudentsGroup(type: string): Promise<Score[]> {
+    const collections = GroupValue[type];
+    if (!collections || collections.length !== 3) {
+      throw new Error(`Invalid group type: ${type}`);
+    }
+
+    const top10StudentsGroupByType = await this.scoreRepository
       .createQueryBuilder('score')
       .leftJoinAndSelect('score.student', 'student')
       .select([
@@ -55,128 +60,13 @@ export class ScoresRepository {
         'student',
       ])
       .orderBy(
-        `COALESCE(score.math, 0) + COALESCE(score.physics, 0) + COALESCE(score.chemistry, 0)`,
+        `COALESCE(score.${collections[0]}, 0) + COALESCE(score.${collections[1]}, 0) + COALESCE(score.${collections[2]}, 0)`,
         'DESC',
       )
       .limit(10)
       .getMany();
 
-    return top10StudentsGroupA;
-  }
-  //List top 10 students of group A01 including (math, language, physics)
-  async top10StudentsGroupA01(): Promise<Score[]> {
-    const top10StudentsGroupA01 = await this.scoreRepository
-      .createQueryBuilder('score')
-      .leftJoinAndSelect('score.student', 'student')
-      .select([
-        'score.id',
-        'score.math',
-        'score.literature',
-        'score.language',
-        'score.physics',
-        'score.chemistry',
-        'score.biology',
-        'score.history',
-        'score.geography',
-        'score.civic_education',
-        'score.language_code',
-        'student',
-      ])
-      .orderBy(
-        `COALESCE(score.math, 0) + COALESCE(score.physics, 0) + COALESCE(score.language, 0)`,
-        'DESC',
-      )
-      .limit(10)
-      .getMany();
-
-    return top10StudentsGroupA01;
-  }
-
-  //List top 10 students of group B00 including (math, biology, chemistry)
-  async top10StudentsGroupB00(): Promise<Score[]> {
-    const top10StudentsGroupB00 = await this.scoreRepository
-      .createQueryBuilder('score')
-      .leftJoinAndSelect('score.student', 'student')
-      .select([
-        'score.id',
-        'score.math',
-        'score.literature',
-        'score.language',
-        'score.physics',
-        'score.chemistry',
-        'score.biology',
-        'score.history',
-        'score.geography',
-        'score.civic_education',
-        'score.language_code',
-        'student',
-      ])
-      .orderBy(
-        `COALESCE(score.math, 0) + COALESCE(score.chemistry, 0) + COALESCE(score.biology, 0)`,
-        'DESC',
-      )
-      .limit(10)
-      .getMany();
-
-    return top10StudentsGroupB00;
-  }
-
-  //List top 10 students of group D01 including (math, literature,langugae)
-  async top10StudentsGroupD01(): Promise<Score[]> {
-    const top10StudentsGroupD01 = await this.scoreRepository
-      .createQueryBuilder('score')
-      .leftJoinAndSelect('score.student', 'student')
-      .select([
-        'score.id',
-        'score.math',
-        'score.literature',
-        'score.language',
-        'score.physics',
-        'score.chemistry',
-        'score.biology',
-        'score.history',
-        'score.geography',
-        'score.civic_education',
-        'score.language_code',
-        'student',
-      ])
-      .orderBy(
-        `COALESCE(score.math, 0) + COALESCE(score.literature, 0) + COALESCE(score.language, 0)`,
-        'DESC',
-      )
-      .limit(10)
-      .getMany();
-
-    return top10StudentsGroupD01;
-  }
-
-  //List top 10 students of group C00 including (literature, history, geography)
-  async top10StudentsGroupC00(): Promise<Score[]> {
-    const top10StudentsGroupC00 = await this.scoreRepository
-      .createQueryBuilder('score')
-      .leftJoinAndSelect('score.student', 'student')
-      .select([
-        'score.id',
-        'score.math',
-        'score.literature',
-        'score.language',
-        'score.physics',
-        'score.chemistry',
-        'score.biology',
-        'score.history',
-        'score.geography',
-        'score.civic_education',
-        'score.language_code',
-        'student',
-      ])
-      .orderBy(
-        `COALESCE(score.history, 0) + COALESCE(score.literature, 0) + COALESCE(score.geography, 0)`,
-        'DESC',
-      )
-      .limit(10)
-      .getMany();
-
-    return top10StudentsGroupC00;
+    return top10StudentsGroupByType;
   }
 
   async getSubjectScoreChartBar(subject: string): Promise<ChartDto> {
@@ -210,7 +100,7 @@ export class ScoresRepository {
     return new ChartDto(value);
   }
 
-  async getSubjectScoreChartCircle(subject: string): Promise<ChartDto> {
+  async getSubjectScoreChartCircle(subject: string): Promise<ChartCircleDto> {
     const rawResults = await this.scoreRepository
       .createQueryBuilder('score')
       .select(
@@ -243,6 +133,6 @@ export class ScoresRepository {
       rawResults.total,
     ];
 
-    return new ChartCircletDto(value);
+    return new ChartCircleDto(value);
   }
 }
