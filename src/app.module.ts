@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { ServiceModule } from './services/service.module';
+import { readFileSync } from 'fs';
 
 @Module({
   imports: [
@@ -31,6 +32,11 @@ import { ServiceModule } from './services/service.module';
         cli: {
           migrationsDir: 'src/database/migrations',
         },
+
+        ssl:
+          configService.get<string>('NODE_ENV') === 'production'
+            ? { ca: readFileSync(__dirname + '/assets/ca.pem') }
+            : false,
       }),
       inject: [ConfigService],
     }),

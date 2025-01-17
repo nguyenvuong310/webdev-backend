@@ -57,7 +57,10 @@ export class ScoresService {
     const cacheKey = `top10StudentsGroup${type}`;
 
     const scoresCached = await this.getScoresFromCache(cacheKey);
-    if (scoresCached) {
+    if (
+      scoresCached !== null ||
+      (Array.isArray(scoresCached) && scoresCached.length > 0)
+    ) {
       return scoresCached;
     }
 

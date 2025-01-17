@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY package.json  package-lock.json*  ./
 
-RUN npm ci
+RUN npm i --force or --legacy-peer-deps
 
 ################################
 FROM node:20-alpine AS builder
@@ -19,7 +19,7 @@ RUN npm run build
 
 ENV NODE_ENV=production
 
-RUN npm ci --only=production && npm cache clean --force
+RUN npm i --only=production --force --legacy-peer-deps && npm cache clean --force --legacy-peer-deps
 
 
 ################################

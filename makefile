@@ -1,3 +1,6 @@
-build: docker build -t gscore:latest . 
 
-up: npm run start:dev
+build:
+	docker buildx build --platform linux/amd64 -t vuong676/gscore:latest .
+
+up: 
+	npm run start:dev
