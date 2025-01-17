@@ -13,6 +13,8 @@ services:
       - .env
     volumes:
       - postgres:/var/lib/postgresql/data
+    networks:
+      - gscore
 
   redis:
     image: redis:6.0.7
@@ -32,13 +34,13 @@ services:
     depends_on:
       - redis
     environment:
-      - REDIS_HOSTS=local:redis:6379
+      - REDIS_HOSTS= ${REDIS_HOST}
+    env_file:
+      - .env
     ports:
       - 5540:5540
     volumes:
       - redis:/db
-    networks:
-      - gscore
 
 volumes:
   postgres:

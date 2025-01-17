@@ -4,7 +4,6 @@ import { ScoresModule } from './modules/scores/scores.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
-import { RedisModule } from '@nestjs-modules/ioredis';
 import { ServiceModule } from './services/service.module';
 
 @Module({
@@ -15,14 +14,7 @@ import { ServiceModule } from './services/service.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    RedisModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'single',
-        url: configService.get<string>('REDIS_URL'),
-      }),
-      inject: [ConfigService],
-    }),
+
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

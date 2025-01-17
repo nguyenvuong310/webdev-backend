@@ -30,7 +30,6 @@ export class ScoresService {
     await this.redisService.setValue(
       registrationNo,
       JSON.stringify(scoreMapped),
-      3600,
     );
     return scoreMapped;
   }
@@ -46,7 +45,7 @@ export class ScoresService {
     cacheKey: string,
     scores: ScoreDto[],
   ): Promise<void> {
-    await this.redisService.setValue(cacheKey, JSON.stringify(scores), 3600);
+    await this.redisService.setValue(cacheKey, JSON.stringify(scores));
   }
 
   private async getScoresFromRepository(type: string): Promise<ScoreDto[]> {
@@ -120,6 +119,6 @@ export class ScoresService {
     cacheKey: string,
     chartData: ChartDto | ChartCircleDto,
   ): Promise<void> {
-    await this.redisService.setValue(cacheKey, JSON.stringify(chartData), 3600);
+    await this.redisService.setValue(cacheKey, JSON.stringify(chartData));
   }
 }
