@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 import os
 
 
-df = pd.read_csv("/Users/nguyenvuong/Documents/projects/gscore-backend/src/database/dataset/diem_thi_thpt_2024.csv")
+df = pd.read_csv("/Users/nguyenvuong/Documents/projects/gscore-backend/src/database/seeds/dataset/diem_thi_thpt_2024.csv")
 
 
 db_url = 'postgresql://root:postgres@localhost:5432/gscore'
