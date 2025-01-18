@@ -9,7 +9,7 @@ up:
 	npm run start:dev
 
 bootstrap:
-	npm install
+	npm install --force or --legacy-peer-deps
 	docker compose up -d
 	npm run start:dev
 

@@ -1,40 +1,78 @@
-# Công nghệ sử dụng
+# Technical
 
-- **Ứng dụng**: NestJS
-- **Seed dữ liệu**: Python (Vì python hỗ trợ mạnh mẽ cho việc xử lý dữ liệu lớn)
+- **Application**: [NestJS](https://nestjs.com/)
+- **Seed data**: [Python](https://www.python.org/) (_Because Python provides strong support for big data processing_)
 
-# Cài đặt
+# Settings
 
-- **nodejs**: version >=16
-- **docker**
+- **Node.js**: [nodejs.org](https://nodejs.org/en)
+- **docker**: [python.org](https://www.docker.com/products/docker-desktop/)
 - **makefile**
+  - _Window_: Using [Chocolatey](https://chocolatey.org/install) (Ref: [StackOverFlow](https://stackoverflow.com/questions/32127524/how-to-install-and-use-make-in-windows))
+  - _MacOS_: using Brew `brew install make`
+  - _Linux_: using apt `sudo apt install build-essential -y`
 
-# Kiến trúc
+# Overview architecture
 
-Chèn hình
+![Your Code Work](./screenshots/architecture.jpg)
+
+- Since top students group data or chart data is frequently used, caching will be utilized to improve application performance.
+
+![Your Code Work](./screenshots/overview_architecture.jpg)
 
 # Seed data
 
-Tạo biến môi trường ảo nếu muốn độc lập (fix văn)
-run seed.py
+- You can create a **Python virtual environment** if you don’t want to
+  install packages directly on your machine.
 
-# Chạy
+  install packages directly on your machine.
 
-- Môi trường development (NODE_ENV=development)
+  `python3 -m venv .venv`
 
-  make bootstrap #Đối với lần đầu chạy
-  make up #Những lần sau chỉ cần chạy
+  `source .venv/bin/activate`
 
-- Môi trường development (NODE_ENV=production)
-  Thay đổi những giá trị của .env để phù hợp với host
+  `pip3 install psycopg2-binary pandas sqlalchemy`
+
+- Run seed.py
+
+  `python3 src/database/seeds/seed.py`
+
+# Run
+
+- Development environment (NODE_ENV=development)
+
+  - For the first run
+    `make bootstrap`
+
+  - For subsequent runs, just execute
+    `make up`
 
 # Build
 
-Sử dụng multi tage trong dockerfile để giảm kích thước image
-make build
-make push
+- Use multi-stage builds in Dockerfile to reduce the image size.
+- Build Docker Image
+  `make build`
+- Push Image to Docker Hub
+  `make push`
 
 # Deploy
 
-Backend: Sử dụng Onrender (Docker image)
-Database: Sử dụng Aiven console (Vì hỗ trợ free 5Gb)
+**Backend**
+
+- Using [Onrender](https://render.com/) (Docker image - docker.io/vuong676/gscore:latest)
+- Link Deployed: https://gscore-backend.onrender.com/documentation
+
+**Database**: Using [Aiven Console](https://console.aiven.io/) (Since support free 5GB).
+
+# Swagger API
+
+- Check Scores Feature
+
+![Your Code Work](./screenshots/checkScoreApi.png)
+
+- Get Top Student By Group Type Feature
+  ![Your Code Work](./screenshots/topStudentApi.png)
+
+- Retrieve subject score information for bar chart or circle chart.
+
+![Your Code Work](./screenshots/getChartApi.png)
