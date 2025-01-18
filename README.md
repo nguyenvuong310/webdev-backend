@@ -37,6 +37,8 @@
 
   `python3 src/database/seeds/seed.py`
 
+  - Note*: Change db_url to database path
+
 # Run
 
 - Development environment (NODE_ENV=development)
